@@ -20,6 +20,7 @@ typedef struct {
     uint16_t bits;
     uint8_t  bits_len;
 } bitstream_t;
+
 typedef struct {
     bool    txrdy;
     bool    rxrdy;
