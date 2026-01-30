@@ -30,11 +30,11 @@ static bool parity_bit(uint8_t data, uint8_t data_len, bool even)
     return even ? odd_parity : !odd_parity;
 }
 
-static void error_clear(i8251_usart_t *usart)
+static void error_clear(i8251_usart_t *u)
 {
-    usart->status.pe = false;
-    usart->status.oe = false;
-    usart->status.fe = false;
+    u->status.pe = false;
+    u->status.oe = false;
+    u->status.fe = false;
 }
 
 static bitstream_t create_bitstream_sync(uint8_t data, const i8251_mode_sync_t *m)
@@ -302,6 +302,7 @@ uint8_t i8251_read(i8251_usart_t *usart, bool control_data)
     uint8_t val = 0;
     if (control_data)
     {
+        usart->status.dsr = usart->dsr; // make sure other end is reflected onto the chip
         val |= (usart->status.txrdy ? 1u : 0u) << 0;
         val |= (usart->status.rxrdy ? 1u : 0u) << 1;
         val |= (usart->status.txe   ? 1u : 0u) << 2;
@@ -344,6 +345,13 @@ void i8251_tick_tx(i8251_usart_t *usart)
 
     if (usart->format == I8251_ASYNC)
     {
+        if (!usart->cts)
+        {
+            usart->tx_pin = 1;
+            usart->status.txrdy = false; // not sure if i need to do this, but since it's a "clear to send", maybe it's possible that the flags also get cleared.
+            usart->status.txe = false;
+            return;
+        }
         uint8_t div = usart->mode.asynchronous_mode.baud_sel;
         if (div == 0) div = 1;
 
@@ -548,7 +556,8 @@ void i8251_write(i8251_usart_t *usart, bool control_data, uint8_t data)
         case I8251_COMMAND_INSTR:
         {
             usart->command = decode_command(val);
-
+            usart->rts = usart->command.rts;
+            usart->dtr = usart->command.dtr;
             if (usart->command.er)
                 error_clear(usart);
 
@@ -565,6 +574,8 @@ void i8251_write(i8251_usart_t *usart, bool control_data, uint8_t data)
                 usart->rx_clk_cnt = 0;
                 usart->rx_busy = false;
                 usart->rx_shift = (bitstream_t){0};
+                usart->cts = true;  // make sure to reset state on IR.
+                usart->dsr = true;
             }
 
             break;
@@ -588,4 +599,6 @@ void i8251_init(i8251_usart_t *usart)
     usart->tx_clk_cnt = 0;
     usart->rx_clk_cnt = 0;
     usart->rx_busy = false;
+    usart->cts = true;
+    usart->dsr = true;
 }

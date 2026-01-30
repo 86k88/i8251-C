@@ -7,7 +7,6 @@ typedef enum {
     I8251_ASYNC = 0,
     I8251_SYNC
 } i8251_format_t;
-
 typedef enum {
     I8251_MODE_INSTR = 0,
     I8251_SYNC_CHAR_1,
@@ -20,7 +19,6 @@ typedef struct {
     uint16_t bits;
     uint8_t  bits_len;
 } bitstream_t;
-
 typedef struct {
     bool    txrdy;
     bool    rxrdy;
@@ -78,7 +76,10 @@ typedef struct {
     uint8_t     tx_clk_cnt;
     uint8_t     rx_clk_cnt;
     bool        rx_busy;
-
+    bool        dtr;
+    bool        dsr;
+    bool        rts;
+    bool        cts;
 } i8251_usart_t;
 
 void i8251_init(i8251_usart_t *usart);
