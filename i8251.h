@@ -1,7 +1,5 @@
-#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <stdlib.h>
 
 typedef enum {
     I8251_ASYNC = 0,
