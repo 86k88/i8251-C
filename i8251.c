@@ -30,11 +30,11 @@ static bool parity_bit(uint8_t data, uint8_t data_len, bool even)
     return even ? odd_parity : !odd_parity;
 }
 
-static void error_clear(i8251_usart_t *u)
+static void error_clear(i8251_usart_t *usart)
 {
-    u->status.pe = false;
-    u->status.oe = false;
-    u->status.fe = false;
+    usart->status.pe = false;
+    usart->status.oe = false;
+    usart->status.fe = false;
 }
 
 static bitstream_t create_bitstream_sync(uint8_t data, const i8251_mode_sync_t *m)
