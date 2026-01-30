@@ -7,6 +7,7 @@ typedef enum {
     I8251_ASYNC = 0,
     I8251_SYNC
 } i8251_format_t;
+
 typedef enum {
     I8251_MODE_INSTR = 0,
     I8251_SYNC_CHAR_1,
